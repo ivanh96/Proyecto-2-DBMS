@@ -84,7 +84,41 @@ class sqlListener(ParseTreeListener):
 
     # Enter a parse tree produced by sqlParser#drop_database_stmt.
     def enterDrop_database_stmt(self, ctx:sqlParser.Drop_database_stmtContext):
-        return print("data")
+        getDatabaseName = False
+        databaseName = ""
+        for child in ctx.getChildren():
+            if (getDatabaseName):
+                databaseName = child.getText()
+            if (child.getText() == "DATABASE" and not getDatabaseName):
+                getDatabaseName = True
+
+        databaseExists = os.path.exists(databaseName)
+        if (databaseExists):
+            print("Database exists")
+            metaData = json.load(open('meta-data.json'))
+            databases = metaData["databases"]
+            iExist = -1
+
+            i = 0
+            for db in databases:
+                if(db["name"] == databaseName):
+                    iExist = i
+                i += 1
+
+            if(iExist == -1):
+                print("Database does not exist!")
+            else:
+                del databases[iExist]
+
+                metaData["databases"] = databases
+
+                with open("meta-data.json", 'w') as f:
+                    json.dump(metaData,f)
+
+                os.rmdir(databaseName)
+        else:
+            print("Database does not exist!")
+        pass
 
     # Exit a parse tree produced by sqlParser#drop_database_stmt.
     def exitDrop_database_stmt(self, ctx:sqlParser.Drop_database_stmtContext):
