@@ -50,7 +50,27 @@ class sqlListener(ParseTreeListener):
 
     # Exit a parse tree produced by sqlParser#create_database_stmt.
     def exitCreate_database_stmt(self, ctx:sqlParser.Create_database_stmtContext):
-        return print("data")
+        getDatabaseName = False
+        databaseName = ""
+        for child in ctx.getChildren():
+            if(getDatabaseName):
+                databaseName = child.getText()
+            if(child.getText() == "DATABASE" and not getDatabaseName):
+                getDatabaseName = True
+
+        databaseExists = os.path.exists(databaseName)
+        if(databaseExists):
+            print("Database already exists!")
+        else:
+            newDbDict = {'name': databaseName, 'numberOfTables': 0}
+            metaData = json.load(open('meta-data.json'))
+            metaData["databases"].append(newDbDict)
+
+            with open("meta-data.json", 'w') as f:
+                json.dump(metaData,f)
+            
+            os.makedirs(databaseName)
+        pass
 
 
     # Enter a parse tree produced by sqlParser#alter_database_stmt.
@@ -73,7 +93,17 @@ class sqlListener(ParseTreeListener):
 
     # Enter a parse tree produced by sqlParser#show_databases_stmt.
     def enterShow_databases_stmt(self, ctx:sqlParser.Show_databases_stmtContext):
-        return print("data")
+        metaData = json.load(open('meta-data.json'))
+        databases = metaData["databases"]
+        print("Databases:")
+        i = 1
+        for db in databases:
+            dbName = db["name"]
+            dbNumberOfTables = db["numberOfTables"]
+
+            print(str(i) + ". Name: " + dbName + " | Number of tables: " + str(dbNumberOfTables))
+            i+=1
+        pass
 
     # Exit a parse tree produced by sqlParser#show_databases_stmt.
     def exitShow_databases_stmt(self, ctx:sqlParser.Show_databases_stmtContext):
