@@ -75,7 +75,58 @@ class sqlListener(ParseTreeListener):
 
     # Enter a parse tree produced by sqlParser#alter_database_stmt.
     def enterAlter_database_stmt(self, ctx:sqlParser.Alter_database_stmtContext):
-        return print("data")
+        getDatabaseName = False
+        getDatabaseReName = False
+        databaseName = ""
+        databaseReName = ""
+        for child in ctx.getChildren():
+            if (getDatabaseName):
+                databaseName = child.getText()
+                getDatabaseName = False
+            if(getDatabaseReName):
+                databaseReName = child.getText()
+                getDatabaseReName = False
+
+            if (child.getText() == "DATABASE" and not getDatabaseName):
+                getDatabaseName = True
+            if(child.getText() == "TO" and not getDatabaseReName):
+                getDatabaseReName = True
+
+        databaseExists = os.path.exists(databaseName)
+        databaseReNameExists = os.path.exists(databaseReName)
+        if (databaseExists):
+            if(databaseReNameExists):
+                print("Database '" + databaseReName + "' already exist!")
+            else:
+                metaData = json.load(open('meta-data.json'))
+                databases = metaData["databases"]
+                iExist = -1
+                dbNumberOfTables = 0
+
+                i = 0
+                for db in databases:
+                    if (db["name"] == databaseName):
+                        iExist = i
+                        dbNumberOfTables = db["numberOfTables"]
+                    i += 1
+
+                if (iExist == -1):
+                    print("Database '" + databaseName +  "' does not exist!")
+                    os.rmdir(databaseName)
+                else:
+                    del databases[iExist]
+                    databases.append({'name': databaseReName, 'numberOfTables': dbNumberOfTables})
+                    metaData["databases"] = databases
+
+                    with open("meta-data.json", 'w') as f:
+                        json.dump(metaData, f)
+
+                    os.makedirs(databaseReName)
+                    copy_tree(databaseName, databaseReName)
+                    os.rmdir(databaseName)
+        else:
+            print("Database '" + databaseName + "' does not exist!")
+        pass
 
     # Exit a parse tree produced by sqlParser#alter_database_stmt.
     def exitAlter_database_stmt(self, ctx:sqlParser.Alter_database_stmtContext):
