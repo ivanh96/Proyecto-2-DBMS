@@ -46,10 +46,6 @@ class sqlListener(ParseTreeListener):
 
     # Enter a parse tree produced by sqlParser#create_database_stmt.
     def enterCreate_database_stmt(self, ctx:sqlParser.Create_database_stmtContext):
-        return print("data")
-
-    # Exit a parse tree produced by sqlParser#create_database_stmt.
-    def exitCreate_database_stmt(self, ctx:sqlParser.Create_database_stmtContext):
         getDatabaseName = False
         databaseName = ""
         for child in ctx.getChildren():
@@ -71,6 +67,10 @@ class sqlListener(ParseTreeListener):
             
             os.makedirs(databaseName)
         pass
+
+    # Exit a parse tree produced by sqlParser#create_database_stmt.
+    def exitCreate_database_stmt(self, ctx:sqlParser.Create_database_stmtContext):
+        return print("data")
 
 
     # Enter a parse tree produced by sqlParser#alter_database_stmt.
