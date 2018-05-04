@@ -1,3 +1,4 @@
+import os
 import sys
 from antlr4 import *
 from sqlLexer import sqlLexer
@@ -16,7 +17,7 @@ class ParserExceptionErrorListener(ErrorListener):
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
         raise ParserException("line " + str(line) + ":" + str(column) + " " + msg)
 
-def db_select(current_db, db_list,text):    
+def db_select(current_db, db_list,text):
     for i in db_list:
         if text == i:
             return text
@@ -60,15 +61,15 @@ def main(argv):
             db_list.append(db["name"])
 
         if current_db == "" and len(db_list) == 0:
-            text = input("> Aun no existen bases de datos. Por favor, ingrese el nombre de una nueva: ")
+            text = input("> There is no databases yet. Please, enter the name of a new database: ")
             try:
                 parse("CREATE DATABASE " + text)
                 current_db = text
             except:
-                print("¡Ingrese un nombre valido!")
+                print("Enter a valid name!")
 
         elif current_db == "" and len(db_list) > 0:
-            print("Por favor, seleccione una de las siguientes bases de datos:")
+            print("Please, select one of these databases:")
             for i in db_list:
                 print(i)
             text = input("> ")
@@ -84,6 +85,17 @@ def main(argv):
 
                 elif text[0:12] == "USE DATABASE " and ' ' in text[12:] == False:
                     current_db = db_select(current_db, db_list,text[12:])
+
+
+                elif text[0:13] == "CREATE TABLE " or text[0:11] == "DROP TABLE ":
+                    try:
+                        os.chdir(current_db)
+                        parse(text);
+                        os.chdir("..")
+                    except ParserException as e:
+                        print("Got a parser exception:", e.value)
+                        os.chdir("..")
+
 
                 else:
                     parse(text);
