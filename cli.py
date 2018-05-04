@@ -87,7 +87,7 @@ def main(argv):
                     current_db = db_select(current_db, db_list,text[12:])
 
 
-                elif text[0:13] == "CREATE TABLE " or text[0:11] == "DROP TABLE " or text == "SHOW TABLES":
+                elif text[0:13] == "CREATE TABLE " or text[0:11] == "DROP TABLE " or text == "SHOW TABLES" or text[0:12] == "ALTER TABLE ":
                     try:
                         os.chdir(current_db)
                         parse(text);
@@ -111,7 +111,7 @@ def main(argv):
                     parse(text);
 
 
-                    print("Valid")
+                    print("Valid, but the function is not supported")
 
             except ParserException as e:
                 print("Got a parser exception:", e.value)
