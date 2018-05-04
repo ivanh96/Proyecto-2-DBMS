@@ -1,7 +1,7 @@
 # Generated from .\sql.g4 by ANTLR 4.7.1
 from antlr4 import *
 import os
-import simplejson as json
+import json
 from distutils.dir_util import copy_tree
 if __name__ is not None and "." in __name__:
     from .sqlParser import sqlParser
@@ -11,6 +11,10 @@ valid_types = ["INT", "FLOAT", "DATE", "CHAR", "int", "float", "date", "char"]
 
 # This class defines a complete listener for a parse tree produced by sqlParser.
 class sqlListener(ParseTreeListener):
+    
+    # Get the value from Token expr
+    def getTokenValue(self, name):
+        return name.getText()
 
     # Enter a parse tree produced by sqlParser#parse.
     def enterParse(self, ctx:sqlParser.ParseContext):
@@ -394,7 +398,24 @@ class sqlListener(ParseTreeListener):
 
     # Enter a parse tree produced by sqlParser#insert_stmt.
     def enterInsert_stmt(self, ctx:sqlParser.Insert_stmtContext):
-        pass
+        tableName = ctx.table_name().getText()
+        tableExists = os.path.exists(tableName + ".json")
+        if (tableExists==False):
+            print("The table doesnt exists!")
+        else:
+            fileName = "%s.json" % (tableName)
+            
+            values = [self.getTokenValue(value) for value in ctx.expr()]
+            
+            with open(fileName, 'r') as f:
+                table = json.load(f)
+
+            for i in range(len(values)):
+                table['fields'].append(values[i])
+                                   
+                with open(fileName, 'w') as f:
+                    json.dump(table, f)                   
+                pass
 
     # Exit a parse tree produced by sqlParser#insert_stmt.
     def exitInsert_stmt(self, ctx:sqlParser.Insert_stmtContext):
