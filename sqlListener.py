@@ -11,7 +11,7 @@ valid_types = ["INT", "FLOAT", "DATE", "CHAR", "int", "float", "date", "char"]
 
 # This class defines a complete listener for a parse tree produced by sqlParser.
 class sqlListener(ParseTreeListener):
-    
+
     # Get the value from Token expr
     def getTokenValue(self, name):
         return name.getText()
@@ -340,7 +340,7 @@ class sqlListener(ParseTreeListener):
             if (tableExists):
                 print("The table already exists!")
             else:
-                newTableDict = {'name':ctx.table_name().getText(), 'fields':[], 'constraints':[]}
+                newTableDict = {'name':ctx.table_name().getText(), 'fields':[], 'constraints':[], 'record':[]}
                 for i in range(len(ctx.column_def())):
                     if ctx.column_def()[i].type_name().getText().split("(")[0] in valid_types:
                         newTableDict['fields'].append({'name':ctx.column_def()[i].column_name().getText(), 'type':ctx.column_def()[i].type_name().getText()})
@@ -400,22 +400,27 @@ class sqlListener(ParseTreeListener):
     def enterInsert_stmt(self, ctx:sqlParser.Insert_stmtContext):
         tableName = ctx.table_name().getText()
         tableExists = os.path.exists(tableName + ".json")
+        n = 0
         if (tableExists==False):
             print("The table doesnt exists!")
         else:
             fileName = "%s.json" % (tableName)
-            
+
             values = [self.getTokenValue(value) for value in ctx.expr()]
-            
+
             with open(fileName, 'r') as f:
                 table = json.load(f)
 
+            lista = []
+
             for i in range(len(values)):
-                table['fields'].append(values[i])
-                                   
-                with open(fileName, 'w') as f:
-                    json.dump(table, f)                   
-                pass
+                lista.append(values[i])
+                print(lista)
+            table['record'].append(lista)
+
+            with open(fileName, 'w') as f:
+                json.dump(table, f)
+            pass
 
     # Exit a parse tree produced by sqlParser#insert_stmt.
     def exitInsert_stmt(self, ctx:sqlParser.Insert_stmtContext):
