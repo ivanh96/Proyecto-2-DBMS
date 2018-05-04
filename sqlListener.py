@@ -328,6 +328,16 @@ class sqlListener(ParseTreeListener):
 
     # Enter a parse tree produced by sqlParser#drop_table_stmt.
     def enterDrop_table_stmt(self, ctx:sqlParser.Drop_table_stmtContext):
+        tableName = ctx.table_name().getText()
+        tableExists = os.path.exists(tableName + ".json")
+        if (tableExists):
+            text = input("Do you really want to drop the table " + tableName + "? y/n\n")
+            if text == "y":
+                os.remove("%s.json" % (tableName))
+            else:
+                print("Table was not removed.")
+        else:
+            print("%s does not exists" % (tableName))
         pass
 
     # Exit a parse tree produced by sqlParser#drop_table_stmt.
