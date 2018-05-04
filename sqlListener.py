@@ -285,15 +285,8 @@ class sqlListener(ParseTreeListener):
 
     # Enter a parse tree produced by sqlParser#create_table_stmt.
     def enterCreate_table_stmt(self, ctx:sqlParser.Create_table_stmtContext):
-            getTableName = False
-            tableName = ""
-            for child in ctx.getChildren():
-                if(getTableName):
-                    tableName = child.getText()
-                if(child.getText() == "DATABASE" and not getTableName):
-                    getTableName = True
-
-            tableExists = os.path.exists(tableName)
+            tableName = ctx.table_name().getText()
+            tableExists = os.path.exists(tableName + ".json")
             if (tableExists):
                 print("The table already exists!")
             else:
@@ -305,8 +298,7 @@ class sqlListener(ParseTreeListener):
                     else:
                         print(ctx.column_def()[i].column_name().getText() + " data type is invalid!")
                         return
-                fileName = "%s.json" % (newTableDict["name"])
-
+                fileName = "%s.json" % (tableName)
                 with open(fileName, 'w') as f:
                     json.dump(newTableDict, f)
                 pass
