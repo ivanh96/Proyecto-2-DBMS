@@ -201,6 +201,16 @@ class sqlListener(ParseTreeListener):
 
     # Enter a parse tree produced by sqlParser#show_tables_stmt.
     def enterShow_tables_stmt(self, ctx:sqlParser.Show_tables_stmtContext):
+        for file in os.listdir():
+            data = json.load(open(file))
+            text = "Table name: %s" % (data["name"])
+
+            for i in data["fields"]:
+                text += " | column: %s" % (i["name"])
+            print(text)
+
+
+
         pass
 
     # Exit a parse tree produced by sqlParser#show_tables_stmt.
@@ -231,6 +241,7 @@ class sqlListener(ParseTreeListener):
 
     # Enter a parse tree produced by sqlParser#alter_table_stmt.
     def enterAlter_table_stmt(self, ctx:sqlParser.Alter_table_stmtContext):
+
         pass
 
     # Exit a parse tree produced by sqlParser#alter_table_stmt.
@@ -291,14 +302,15 @@ class sqlListener(ParseTreeListener):
                 print("The table already exists!")
             else:
                 newTableDict = {'name':ctx.table_name().getText(), 'fields':[], 'constraints':[]}
-                
                 for i in range(len(ctx.column_def())):
                     if ctx.column_def()[i].type_name().getText().split("(")[0] in valid_types:
                         newTableDict['fields'].append({'name':ctx.column_def()[i].column_name().getText(), 'type':ctx.column_def()[i].type_name().getText()})
                     else:
                         print(ctx.column_def()[i].column_name().getText() + " data type is invalid!")
                         return
+
                 fileName = "%s.json" % (tableName)
+
                 with open(fileName, 'w') as f:
                     json.dump(newTableDict, f)
                 pass
