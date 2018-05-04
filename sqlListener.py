@@ -291,7 +291,7 @@ class sqlListener(ParseTreeListener):
                 print("The table already exists!")
             else:
                 newTableDict = {'name':ctx.table_name().getText(), 'fields':[], 'constraints':[]}
-                data = {}
+                
                 for i in range(len(ctx.column_def())):
                     if ctx.column_def()[i].type_name().getText().split("(")[0] in valid_types:
                         newTableDict['fields'].append({'name':ctx.column_def()[i].column_name().getText(), 'type':ctx.column_def()[i].type_name().getText()})
