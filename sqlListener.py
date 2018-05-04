@@ -93,7 +93,9 @@ class sqlListener(ParseTreeListener):
 
             if (child.getText() == "DATABASE" and not getDatabaseName):
                 getDatabaseName = True
-            if(child.getText() == "TO" and not getDatabaseReName):
+            if(child.getText() == "RENAME" and not getDatabaseReName):
+                dummy = True
+            if(child.getText() == "TO" and not getDatabaseReName and dummy == True):
                 getDatabaseReName = True
 
         databaseExists = os.path.exists(databaseName)
@@ -339,7 +341,7 @@ class sqlListener(ParseTreeListener):
                     if ctx.column_def()[i].type_name().getText().split("(")[0] in valid_types:
                         newTableDict['fields'].append({'name':ctx.column_def()[i].column_name().getText(), 'type':ctx.column_def()[i].type_name().getText()})
                     else:
-                        print(ctx.column_def()[i].column_name().getText() + " data type is invalid!")
+                        print(ctx.column_def()[i].column_name().getText() + " data type is not valid!")
                         return
 
                 fileName = "%s.json" % (tableName)
