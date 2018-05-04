@@ -87,11 +87,21 @@ def main(argv):
                     current_db = db_select(current_db, db_list,text[12:])
 
 
-                elif text[0:13] == "CREATE TABLE " or text[0:11] == "DROP TABLE ":
+                elif text[0:13] == "CREATE TABLE " or text[0:11] == "DROP TABLE " or text == "SHOW TABLES":
                     try:
                         os.chdir(current_db)
                         parse(text);
+                        tableNumber = len(os.listdir())
                         os.chdir("..")
+                        metaData = json.load(open('meta-data.json'))
+                        databases = metaData["databases"]
+                        for i in databases:
+                            if i["name"] == current_db:
+                                i["numberOfTables"] = tableNumber
+                        with open("meta-data.json", 'w') as f:
+                            json.dump(metaData,f)
+
+
                     except ParserException as e:
                         print("Got a parser exception:", e.value)
                         os.chdir("..")
