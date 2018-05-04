@@ -285,12 +285,31 @@ class sqlListener(ParseTreeListener):
 
     # Enter a parse tree produced by sqlParser#create_table_stmt.
     def enterCreate_table_stmt(self, ctx:sqlParser.Create_table_stmtContext):
-        if current_db == "":
-            return "A777"
-        else:
-            os.chdir(current_db)
-            os.chdir("..")
-        pass
+            getTableName = False
+            tableName = ""
+            for child in ctx.getChildren():
+                if(getTableName):
+                    tableName = child.getText()
+                if(child.getText() == "DATABASE" and not getTableName):
+                    getTableName = True
+
+            tableExists = os.path.exists(tableName)
+            if (tableExists):
+                print("The table already exists!")
+            else:
+                newTableDict = {'name':ctx.table_name().getText(), 'fields':[], 'constraints':[]}
+                data = {}
+                for i in range(len(ctx.column_def())):
+                    if ctx.column_def()[i].type_name().getText().split("(")[0] in valid_types:
+                        newTableDict['fields'].append({'name':ctx.column_def()[i].column_name().getText(), 'type':ctx.column_def()[i].type_name().getText()})
+                    else:
+                        print(ctx.column_def()[i].column_name().getText() + " data type is invalid!")
+                        return
+                fileName = "%s.json" % (newTableDict["name"])
+
+                with open(fileName, 'w') as f:
+                    json.dump(newTableDict, f)
+                pass
 
     # Exit a parse tree produced by sqlParser#create_table_stmt.
     def exitCreate_table_stmt(self, ctx:sqlParser.Create_table_stmtContext):
