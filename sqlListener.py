@@ -241,6 +241,39 @@ class sqlListener(ParseTreeListener):
 
     # Enter a parse tree produced by sqlParser#alter_table_stmt.
     def enterAlter_table_stmt(self, ctx:sqlParser.Alter_table_stmtContext):
+        getTableName = False
+        getTableRename = False
+        tableName = ""
+        tableRename = ""
+
+        for child in ctx.getChildren():
+            if (getTableName):
+                tableName = child.getText()
+                getTableName = False
+            if(getTableRename):
+                tableRename = child.getText()
+                getTableRename = False
+
+            if (child.getText() == "TABLE" and not getTableName):
+                getTableName = True
+            if(child.getText() == "TO" and not getTableRename):
+                getTableRename = True
+        print(tableName, tableRename)
+        dataTableExists = os.path.exists("%s.json" % (tableName))
+        dataTableRenameExists = os.path.exists("%s.json" % (tableRename))
+
+        if dataTableExists:
+            if dataTableRenameExists:
+                print("You cannot use that table name, it already exists!")
+            else:
+                os.rename("%s.json" % (tableName), "%s.json" % (tableRename))
+                data = json.load(open("%s.json" % (tableRename)))
+                data["name"] = tableRename
+                with open("%s.json" % (tableRename), 'w') as f:
+                    json.dump(data,f)
+                print("Table name, succesfully changed!")
+        else:
+            print("That table does not exist!")
 
         pass
 
