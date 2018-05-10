@@ -111,7 +111,6 @@ def main(argv):
                     parse(text);
 
 
-                    print("Valid, but the function is not supported")
 
             except ParserException as e:
                 print("Got a parser exception:", e.value)
