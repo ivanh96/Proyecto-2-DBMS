@@ -735,7 +735,21 @@ class sqlListener(ParseTreeListener):
 
     # Enter a parse tree produced by sqlParser#select_core.
     def enterSelect_core(self, ctx:sqlParser.Select_coreContext):
-        pass
+        tableName = ctx.table_or_subquery()[0].getText()
+        tableExists = os.path.exists(tableName + ".json")
+        if (tableExists==False):
+            print("The table doesnt exists!")
+        else:
+            fileName = "%s.json" % (tableName)
+
+            cols = [self.getTokenValue(value) for value in ctx.result_column()]
+
+            with open(fileName, 'r') as f:
+                table = json.load(f)
+
+                print(cols)
+                print(table['record'])
+            pass
 
     # Exit a parse tree produced by sqlParser#select_core.
     def exitSelect_core(self, ctx:sqlParser.Select_coreContext):
