@@ -79,17 +79,22 @@ def main(argv):
         else:
             try:
                 text = input("> ")
-
                 if (text == 'exit'):
                     sys.exit()
 
-                elif text[0:12] == "USE DATABASE " and ' ' in text[12:] == False:
-                    current_db = db_select(current_db, db_list,text[12:])
+                elif text[0:13] == "USE DATABASE ":
+                    parse(text);
+                    metaData = json.load(open('meta-data.json'))
+                    databases = metaData["databases"]
+                    for i in databases:
+                        if i["name"] == text[13:]:    
+                            current_db = text[13:]
 
 
                 elif text[0:13] == "CREATE TABLE " or text[0:11] == "DROP TABLE " or text == "SHOW TABLES" or text[0:12] == "ALTER TABLE " or text[0:12] == "INSERT INTO ":
                     try:
                         os.chdir(current_db)
+                        print(current_db)
                         parse(text);
                         tableNumber = len(os.listdir())
                         os.chdir("..")
@@ -121,6 +126,7 @@ def main(argv):
 
             except Exception as e:
                 print("Got exception: ", e)
+
 
 if __name__ == '__main__':
     main(sys.argv)
